@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const compression = require("compression");
 const  helmet = require("helmet");
 // const routes = require("./routes");
-// const unKnownEndpoint = require("./middleware/unKnownEndpoint");
+const unKnownEndpoint = require("./middleware/unKnownEndpoint");
 const {handleError} = require("./helpers/error");
 
 const app = express();
@@ -32,5 +32,5 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
     res.send("<h1 style = 'text-align:center'>API</h1>");
 });
-// app.use(unKnownEndpoint);
+app.use(unKnownEndpoint);
 app.use(handleError);
