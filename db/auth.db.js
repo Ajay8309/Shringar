@@ -1,4 +1,4 @@
-const pool = require("../config");
+const pool = require("../config/index");
 
 const isValidTokenDb = async ({token, email, curDate}) => {
      const {rows} = await pool.query(

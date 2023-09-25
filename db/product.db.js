@@ -1,4 +1,4 @@
-const pool = require("../config");
+const pool = require("../config/index");
 
 const getAllProductsDb = async ({limit, offset}) => {
      const {rows} = await pool.query(
@@ -63,38 +63,63 @@ const createProductDb = async ({ name, weight, description, image_url, category_
 };
 
 
-// changes are needed as changes are made in our Db
+
 const getProductDb = async (id) => {
-    const {rows: product} = await pool.query(
+    const { rows: product } = await pool.query(
         `
-        select products.*, round(avg(reviews.rating), 1) as avg_rating, count(reviews.*) from products
-        LEFT JOIN reviews
-        ON products.product_id = reviews.product_id
-        where products.product_id = $1
-        group by products.product_id
-        
+        SELECT
+            products.*,
+            ROUND(AVG(reviews.rating), 1) AS avg_rating,
+            COUNT(reviews.*) AS review_count,
+            material_type.name AS material_type_name,
+            product_category.name AS category_name
+        FROM
+            products
+        LEFT JOIN
+            reviews ON products.product_id = reviews.product_id
+        LEFT JOIN
+            material_type ON products.material_id = material_type.id
+        LEFT JOIN
+            product_category ON products.category_id = product_category.id
+        WHERE
+            products.product_id = $1
+        GROUP BY
+            products.product_id, material_type.name, product_category.name
         `,
         [id]
     );
     return product[0];
 }
 
-// changes are needed here as we have made some changes in our Db
+
 
 const getProductByNameDb = async (name) => {
-    const {rows:product} = await pool.query(
+    const { rows: product } = await pool.query(
         `
-        select products.*, trunc(avg(reviews.rating),1) as avg_rating, count(reviews.*) from products
-        LEFT JOIN reviews
-        ON products.product_id = reviews.product_id
-        where products.name = $1
-        group by products.product_Id
+        SELECT
+            products.*,
+            ROUND(AVG(reviews.rating), 1) AS avg_rating,
+            COUNT(reviews.*) AS review_count,
+            material_type.name AS material_type_name,
+            product_category.name AS category_name
+        FROM
+            products
+        LEFT JOIN
+            reviews ON products.product_id = reviews.product_id
+        LEFT JOIN
+            material_type ON products.material_id = material_type.id
+        LEFT JOIN
+            product_category ON products.category_id = product_category.id
+        WHERE
+            products.name = $1
+        GROUP BY
+            products.product_id, material_type.name, product_category.name
         `,
-        [name]
+        [id]
     );
-
     return product[0];
 }
+
 
 const updateProductDb = async ({ product_id, name, weight, description, image_url, price, category_name, material_type_name }) => {
     const { rows: product } = await pool.query(
@@ -112,6 +137,23 @@ const updateProductDb = async ({ product_id, name, weight, description, image_ur
 };
 
 
+const deleteProductDb = async (id) => {
+    const {rows} = await pool.query(
+        `DELETE FROM products where product_id = $1 returning *`,
+        [id]
+    );
+    return rows[0];
+}
+
+
+module.exports = {
+    getAllProductsDb,
+    createProductDb,
+    getProductDb,
+    getProductByNameDb,
+    updateProductDb,
+    deleteProductDb,
+};
 
 
 
