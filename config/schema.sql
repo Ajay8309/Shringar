@@ -63,6 +63,8 @@ CREATE TABLE public.product_category
 CREATE TABLE public.material_type
 (
     id SERIAL NOT NULL,
+    gold_price real, -- Add gold_price attribute
+    silver_price real, -- Add silver_price attribute
     name character varying(50) NOT NULL,
     PRIMARY KEY (id)
 );
@@ -77,6 +79,7 @@ CREATE TABLE public.products
     image_url character varying,
     category_id integer,
     material_id integer,
+    weight real, 
     PRIMARY KEY (product_id),
     FOREIGN KEY (category_id)
         REFERENCES public.product_category (id)
