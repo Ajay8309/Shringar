@@ -2,7 +2,7 @@ const pool = require("../config/index");
 
 const createCartDb = async (userId) => {
     const {rows:cart} = await pool.query(
-        `INSERT INTO cart(user_Id) values ($1) returning cart.id`,
+        `INSERT INTO cart(user_id) values ($1) returning cart.id`,
         [userId]
     );
     return cart[0];
