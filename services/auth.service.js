@@ -7,7 +7,7 @@ const {
     isValidTokenDb
 } = require("../db/auth.db");
 
-const validateUser = require("../helpers/vaidateUser");
+const {validateUser, validatePassword} = require("../helpers/validateUser");
 const {ErrorHandler}= require("../helpers/error");
 const {
     changeUserPassword,
@@ -25,25 +25,33 @@ const {OAuth2Client} = require("google-auth-library");
 const crypto = require("crypto");
 const moment = require("moment");
 const {logger} = require("../utils/logger");
-const { error } = require("console");
+// const { error } = require("console");
 let curDate = moment().format();
 
 class AuthService {
 
     async signUp(user) {
         try {
+            // destructure kiya hai user kee data ko ....controller kee code ko dekhne pr
+            // thodaa idea lagg jayegaa
             const {password, email, fullname, username} = user;
-
+            // agar kuch missing hai toh error denaa hai
             if(!email || !password || !fullname || !username) {
                 throw new ErrorHandler(401, " all fields required");
             }
 
             if(validateUser(email, password)) {
+                // salt create kiyaa jisee hum humare password kee saath mixup krenge and 
+                // kuch secure hashPassword create krenge 
                 const salt = await bcrypt.genSalt();
                 const hashedPassword = await bcrypt.hash(password, salt); 
-
+                
+                //  email and username paas krke check kiyaa hai ki koi iss 
+                // email yaa username see already user exist krtaa hai kyaa
                 const userByEmail = await getUserByEmailDb(email);
                 const userByUsername = await getUserByUsernameDb(username);
+
+                // agr exist krtaa hai toh below error diyaa
 
                 if(userByEmail){
                     throw new ErrorHandler(401, "email already taken:");
@@ -52,31 +60,48 @@ class AuthService {
                 if(userByUsername) {
                     throw new ErrorHandler(401, "username already taken:");
                 }
-
+                
+                // agr exist nahi krtaa toh naya user create kiyaa 
+                // and jo password create kiyaa thaa vo and baaki saari details as it is daaldi
                 // create new user
                 const newUser = await createUserDb({
                     ...user,
                     password:hashedPassword,
                 });
 
+                // create cart Db
+                // nayee user kee liyee naya cart db bnaya
                 const {id: cart_id} = await createCartDb(newUser.user_id);
 
+                // create wishlist Db
+                // nayee user kee liye naya wishlist db bnaya
+                const {id: wishlist_id} = await createWishlistDb(newUser.user_id);
+
+                // yee below tokens humnee jwt see bnayee hai
+                
                 const token = await this.signToken({
                     id: newUser.user_id,
                     roles: newUser.roles,
                     cart_id,
+                    wishlist_id,
                 });
                 
                 const refreshToken = await this.signRefreshToken({
                     id: newUser.user_id,
                     roles: newUser.roles,
                     cart_id,
+                    wishlist_id,
                 });
 
                 return {
                     token,
                     refreshToken,
-                    cart_id,
+                    user : {
+                        user_id : newUser.user_id,
+                        fullname : newUser.fullname,
+                        username : newUser.username,
+                        email : newUser.email,
+                    } 
                 }
 
 
@@ -111,6 +136,7 @@ class AuthService {
                 user_id,
                 roles,
                 cart_id,
+                wishlist_id,
                 fullname,
                 username, 
             } = user;
@@ -121,11 +147,12 @@ class AuthService {
                 throw new ErrorHandler(403, "Email or password incorrect");
             }
 
-            const token = await this.signToken({id:user_id, roles, cart_id});
+            const token = await this.signToken({id:user_id, roles, cart_id, wishlist_id});
             const refreshToken = await this.signRefreshToken({
                 id:user_id,
                 roles,
                 cart_id,
+                wishlist_id,
             });
             return {
                 token,
@@ -199,7 +226,44 @@ class AuthService {
             throw new ErrorHandler(error.statusCode, error.message);
         }
     }
+    
+    async resetPassword (password, password2, token, email) {
+        const isValidPassword =  validatePassword(password);
 
+        if(password != password2){
+            throw new ErrorHandler(400, "password does not match:");
+        }
+
+        if(!isValidPassword){
+            throw new ErrorHandler(400, "password length must be atleast 6 charcters");
+        }
+
+        try {
+            const isTokenValid = await isValidTokenDb({
+                token,
+                email,
+                curDate,
+            });
+
+            if(!isTokenValid) {
+                throw new ErrorHandler(400, "token not found try again");
+            }
+
+
+            await setTokenStatusDb(email);
+
+            const salt = await bcrypt.genSalt();
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            await changeUserPassword(hashedPassword, email);
+            await mail.resetPasswordMail(email);
+        } catch (error) {
+            throw new ErrorHandler(error.statusCode, error.message);
+        }
+    }
+
+
+    // verifyGoogleId token will come here which is required for google login
 
 
 
@@ -230,6 +294,7 @@ class AuthService {
                 id : payload.id,
                 roles : payload.roles,
                 cart_id : payload.cart_id,
+                wishlist_id: payload.wishlist_id,
             };
         } catch (error) {
             logger.error(error);
@@ -238,3 +303,5 @@ class AuthService {
     }
 
 }
+
+module.exports = new AuthService();

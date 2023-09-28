@@ -6,7 +6,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
 const  helmet = require("helmet");
-// const routes = require("./routes");
+const routes = require("./routes");
 const unKnownEndpoint = require("./middleware/unKnownEndpoint");
 const {handleError} = require("./helpers/error");
 
@@ -27,7 +27,7 @@ app.use(compression());
 app.use(helmet());
 app.use(cookieParser());
 
-// app.use("/api", routes);
+app.use("/api", routes);
 
 app.get("/", (req, res) => {
     res.send("<h1 style = 'text-align:center'>API</h1>");
