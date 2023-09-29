@@ -1,10 +1,10 @@
-require("dotenv").config({path:__dirname + "/.env"});
+require("dotenv").config({ path: __dirname + "/.env" });
 const http = require("http");
 const app = require("./app");
-const {logger} = require("./utils/logger");
+const { logger } = require("./utils/logger");
 
 const server = http.createServer(app);
 
-const PORT = 9001;
+const PORT = process.env.PORT || 8080;
 
-server.listen(PORT, () => logger.info(`Server running at port: ${PORT}`));
+server.listen(PORT, () => logger.info(`Magic happening on port: ${PORT}`));

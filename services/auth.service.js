@@ -4,10 +4,10 @@ const {
     setTokenStatusDb,
     createResetTokenDb, 
     deleteResetTokenDb, 
-    isValidTokenDb
+    isValidTokenDb,
 } = require("../db/auth.db");
 
-const {validateUser, validatePassword} = require("../helpers/validateUser");
+const validateUser = require("../helpers/validateUser");
 const {ErrorHandler}= require("../helpers/error");
 const {
     changeUserPassword,
@@ -21,7 +21,7 @@ const {createCartDb} = require("../db/cart.db");
 const {createWishlistDb} = require("../db/wishlist.db");
 const mail = require("./mail.service");
 
-const {OAuth2Client} = require("google-auth-library");
+// const {OAuth2Client} = require("google-auth-library");
 const crypto = require("crypto");
 const moment = require("moment");
 const {logger} = require("../utils/logger");
@@ -34,8 +34,13 @@ class AuthService {
         try {
             // destructure kiya hai user kee data ko ....controller kee code ko dekhne pr
             // thodaa idea lagg jayegaa
-            const {password, email, fullname, username} = user;
+            const {email, password, fullname, username} = user;
             // agar kuch missing hai toh error denaa hai
+            // console.log('Email:', email);
+            // console.log('Password:', password);
+            // console.log('Fullname:', fullname);
+            // console.log('Username:', username);
+
             if(!email || !password || !fullname || !username) {
                 throw new ErrorHandler(401, " all fields required");
             }
@@ -48,6 +53,11 @@ class AuthService {
                 
                 //  email and username paas krke check kiyaa hai ki koi iss 
                 // email yaa username see already user exist krtaa hai kyaa
+                // console.log('Username:', username);
+                // console.log('Email:', email);
+
+                
+
                 const userByEmail = await getUserByEmailDb(email);
                 const userByUsername = await getUserByUsernameDb(username);
 
@@ -109,7 +119,7 @@ class AuthService {
                 throw new ErrorHandler(401, "Input validation error");
             }
         } catch (error) {
-            throw new ErrorHandler(error.statusCode, error.message);
+            throw new ErrorHandler(error.statusCode, error.message); // this is line 117
         }
     }
 
@@ -117,62 +127,63 @@ class AuthService {
 
     async login(email, password) {
         try {
-            if(!validateUser(email, password)){
-                throw new ErrorHandler(403, "Invalid login");
-            }
-
-            const user = await getUserByEmailDb(email);
-
-            if(!user){
-                throw new ErrorHandler(403, "Email or Password incorrect");
-            }
-
-            if(user.google_id && !user.password) {
-                throw new ErrorHandler(403, "Login with Google");
-            }
-
-            const  {
-                password:dbPassword,
-                user_id,
-                roles,
-                cart_id,
-                wishlist_id,
-                fullname,
-                username, 
-            } = user;
-
-            const isCorrectPassword = await bcrypt.compare(password, dbPassword);
-
-            if(!isCorrectPassword){
-                throw new ErrorHandler(403, "Email or password incorrect");
-            }
-
-            const token = await this.signToken({id:user_id, roles, cart_id, wishlist_id});
-            const refreshToken = await this.signRefreshToken({
-                id:user_id,
-                roles,
-                cart_id,
-                wishlist_id,
-            });
-            return {
-                token,
-                refreshToken,
-                user:{
-                    user_id,
-                    fullname,
-                    username,
-                }
-            };
+          console.log("Received login request with email:", email);
+          if (!validateUser(email, password)) {
+            throw new ErrorHandler(403, "Invalid login");
+          }
+    
+          const user = await getUserByEmailDb(email);
+    
+          if (!user) {
+            throw new ErrorHandler(403, "Email or password incorrect.");
+          }
+    
+          if (user.google_id && !user.password) {
+            throw new ErrorHandler(403, "Login in with Google");
+          }
+    
+          const {
+            password: dbPassword,
+            user_id,
+            roles,
+            cart_id,
+            fullname,
+            username,
+          } = user;
+          const isCorrectPassword = await bcrypt.compare(password, dbPassword);
+    
+          if (!isCorrectPassword) {
+            throw new ErrorHandler(403, "Email or password incorrect.");
+          }
+    
+          const token = await this.signToken({ id: user_id, roles, cart_id });
+          const refreshToken = await this.signRefreshToken({
+            id: user_id,
+            roles,
+            cart_id,
+          });
+    
+          console.log("Login successful. Sending token.");
+    
+          return {
+            token,
+            refreshToken,
+            user: {
+              user_id,
+              fullname,
+              username,
+            },
+          };
         } catch (error) {
-            throw new ErrorHandler(error.statusCode, error.message);
+          console.error("Error during login:", error);
+          throw new ErrorHandler(error.statusCode, error.message);
         }
-    }
-
+      }
     // thodaa idher udher dekh kr sikhna pdegaa
 
-    async googleLogin(code) {
+    // async googleLogin(code) {
 
-    }
+    // }
 
     // genrate refresh token 
     async generateRefreshToken(data) {
@@ -190,10 +201,9 @@ class AuthService {
 
     async forgotPassword(email) {
         const user = await getUserByEmailDb(email);
+        // console.log(user);
 
-        if(!user) {
-            throw new ErrorHandler(403, "email not found");
-        }else{
+       if(user){
             try {
                 await setTokenStatusDb(email);
 
@@ -211,6 +221,8 @@ class AuthService {
             } catch (error) {
                 throw new ErrorHandler(error.statusCode, error.message);
             }
+        }else {
+            throw new ErrorHandler(403, "email not found");
         }
     }
 
@@ -228,7 +240,7 @@ class AuthService {
     }
     
     async resetPassword (password, password2, token, email) {
-        const isValidPassword =  validatePassword(password);
+        const isValidPassword =  typeof password === "string" && password.trim().length >= 6;
 
         if(password != password2){
             throw new ErrorHandler(400, "password does not match:");
@@ -289,7 +301,7 @@ class AuthService {
 
     async verifyRefreshToken(token) {
         try {
-            const payload = jwt.verify(data, process.env.REFRESH_SECRET);
+            const payload = jwt.verify(token, process.env.REFRESH_SECRET);
             return {
                 id : payload.id,
                 roles : payload.roles,

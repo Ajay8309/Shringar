@@ -93,56 +93,24 @@ const updateUserDb = async (
         return await pool.query(
             `update users set password = $1 where email = $2`,
             [hashedPasssword, email]
-        );
-    }
+            );
+        }
+        
+        module.exports = {
+            getAllUsersDb,
+            getUserByIdDb,
+            getUserByEmailDb,
+            updateUserDb,
+            createUserDb,
+            // createUserGoogleDb,
+            deleteUserDb,
+            getUserByUsernameDb,
+            changeUserPassword,
+        };
+        
+   
 
-    module.exports = {
-        getAllUsersDb,
-        getUserByIdDb,
-        getUserByEmailDb,
-        updateUserDb,
-        createUserDb,
-        // createUserGoogleDb,
-        deleteUserDb,
-        getUserByUsernameDb,
-        changeUserPassword,
-    };
 
-
-
-// const getUserByIdDb = async (id) => {
-//     const { rows: user } = await pool.query(
-//         `
-//         SELECT 
-//             users.*,
-//             cart.id AS cart_id,
-//             wishlist.id AS wishlist_id
-//         FROM users
-//         LEFT JOIN cart ON cart.user_id = users.user_id
-//         LEFT JOIN wishlist ON wishlist.user_id = users.user_id
-//         WHERE users.user_id = $1
-//         `,
-//         [id]
-//     );
-//     return user[0];
-// }
-
-// const getUserByUsernameDb = async (username) => {
-//     const { rows: user } = await pool.query(
-//         `
-//         SELECT 
-//             users.*,
-//             cart.id AS cart_id,
-//             wishlist.id AS wishlist_id
-//         FROM users
-//         LEFT JOIN cart ON cart.user_id = users.user_id
-//         LEFT JOIN wishlist ON wishlist.user_id = users.user_id
-//         WHERE lower(users.username) = lower($1)
-//         `,
-//         [username]
-//     );
-//     return user[0];
-// }
 
 
 // CREATE TABLE public.users

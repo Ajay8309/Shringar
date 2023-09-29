@@ -9,7 +9,7 @@ const createAccount = async (req, res) => {
 
     await mail.signupMail(user.email, user.fullname.split(" ")[0]);
 
-    res.header("auth-token", token);
+    res.header("auth-token", token); 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         sameSite : process.env.NODE_ENV === "development" ? true : "none",
@@ -73,8 +73,8 @@ const refreshToken = async (req, res) => {
     if(!req.cookies.refreshToken) {
         throw new ErrorHandler(401, "token missing");
     }
-
     const tokens = await authService.generateRefreshToken(req.cookies.refreshToken);
+    console.log(tokens.token);
 
     res.header("auth-token", tokens.token);
     res.cookie("refreshToken", tokens.refreshToken, {

@@ -9,6 +9,7 @@ const  helmet = require("helmet");
 const routes = require("./routes");
 const unKnownEndpoint = require("./middleware/unKnownEndpoint");
 const {handleError} = require("./helpers/error");
+// const bodyParser = require('body-parser');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.set("trust proxy", 1);
 
 app.use(cors({credentials:true, origin:true}));
 app.use(express.json());
+// app.use(bodyParser.json());
 
 // GET /api/users 200 10ms
 app.use(morgan("dev"));
@@ -34,3 +36,5 @@ app.get("/", (req, res) => {
 });
 app.use(unKnownEndpoint);
 app.use(handleError);
+
+module.exports = app;
