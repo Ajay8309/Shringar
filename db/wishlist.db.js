@@ -80,10 +80,45 @@ const deleteItemFromWishlistDb = async ({ wishlist_id, product_id }) => {
     return results[0];
 };
 
+const addWishlistItemToCartDb = async (wishlist_id, product_id, user_id) => {
+    // Check if the same item exists in the user's cart
+    const existingCartItem = await pool.query(
+        `
+        SELECT * FROM cart_item
+        WHERE cart_id = (SELECT id FROM cart WHERE user_id = $1)
+        AND product_id = $2
+        `,
+        [user_id, product_id]
+    );
+
+    if (existingCartItem.rowCount === 0) {
+        // Item is not in the cart, so add it with quantity 1
+        await pool.query(
+            `
+            INSERT INTO cart_item (cart_id, product_id, quantity)
+            VALUES ((SELECT id FROM cart WHERE user_id = $1), $2, 1)
+            `,
+            [user_id, product_id]
+        );
+    } else {
+        // Item is already in the cart, so increase its quantity by 1
+        await pool.query(
+            `
+            UPDATE cart_item
+            SET quantity = quantity + 1
+            WHERE cart_id = (SELECT id FROM cart WHERE user_id = $1)
+            AND product_id = $2
+            `,
+            [user_id, product_id]
+        );
+    }
+};
+
 
 module.exports = {
     createWishlistDb,
     getWishlistDb,
     addItemToWishlistDb,
     deleteItemFromWishlistDb,
+    addWishlistItemToCartDb,
 };

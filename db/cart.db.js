@@ -131,7 +131,7 @@ const decreaseItemQuantityDb = async({cart_id, product_id}) => {
     increaseItemQuantityDb,
     decreaseItemQuantityDb,
     emptyCartDb,
-    deleteItemDb
+    deleteItemDb,
  }
 
 

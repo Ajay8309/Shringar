@@ -5,7 +5,7 @@ const {
     createResetTokenDb, 
     deleteResetTokenDb, 
     isValidTokenDb,
-} = require("../db/auth.db");
+} = require("../db/auth.db"); 
 
 const validateUser = require("../helpers/validateUser");
 const {ErrorHandler}= require("../helpers/error");
@@ -199,32 +199,29 @@ class AuthService {
 
     }
 
-    async forgotPassword(email) {
-        const user = await getUserByEmailDb(email);
-        // console.log(user);
+      async forgotPassword(email) {
+    const user = await getUserByEmailDb(email);
 
-       if(user){
-            try {
-                await setTokenStatusDb(email);
+    if (user) {
+      try {
+        await setTokenStatusDb(email);
 
-                // create a random reset token
+        //Create a random reset token
+        var fpSalt = crypto.randomBytes(64).toString("base64");
 
-                var fpSalt = crypto.randomBytes(64).toString("base64");
+        //token expires after one hour
+        var expireDate = moment().add(1, "h").format();
 
-                // token expiry
+        await createResetTokenDb({ email, expireDate, fpSalt });
 
-                var expireDate = moment().add(1, "h").format();
-
-                await createResetTokenDb({email, expireDate, fpSalt});
-
-                await mail.forgotPasswordMail(fpSalt, email);
-            } catch (error) {
-                throw new ErrorHandler(error.statusCode, error.message);
-            }
-        }else {
-            throw new ErrorHandler(403, "email not found");
-        }
+        await mail.forgotPasswordMail(fpSalt, email);
+      } catch (error) {
+        throw new ErrorHandler(error.statusCode, error.message);
+      }
+    } else {
+      throw new ErrorHandler(400, "Email not found");
     }
+  }
 
     async verifyResetToken (token, email) {
         try {

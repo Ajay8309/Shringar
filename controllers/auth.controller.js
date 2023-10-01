@@ -70,7 +70,7 @@ const verifyResetToken = async (req, res) => {
 };
 
 const refreshToken = async (req, res) => {
-    if(!req.cookies.refreshToken) {
+    if (!req.cookies.refreshToken) {
         throw new ErrorHandler(401, "token missing");
     }
     const tokens = await authService.generateRefreshToken(req.cookies.refreshToken);
@@ -78,7 +78,7 @@ const refreshToken = async (req, res) => {
 
     res.header("auth-token", tokens.token);
     res.cookie("refreshToken", tokens.refreshToken, {
-        httpOnly : true,
+        httpOnly: true,
     });
     res.json(tokens);
 };
