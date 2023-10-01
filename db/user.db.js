@@ -89,7 +89,7 @@ const updateUserDb = async (
     // we'll take care of it later
     // const createUserGoogleDb = async ({sub, de})
 
-    const changeUserPassword = async (hashedPasssword, email) => {
+    const changeUserPasswordDb = async (hashedPasssword, email) => {
         return await pool.query(
             `update users set password = $1 where email = $2`,
             [hashedPasssword, email]
@@ -105,7 +105,7 @@ const updateUserDb = async (
             // createUserGoogleDb,
             deleteUserDb,
             getUserByUsernameDb,
-            changeUserPassword,
+            changeUserPasswordDb,
         };
         
    

@@ -34,14 +34,14 @@ class AuthService {
         try {
             // destructure kiya hai user kee data ko ....controller kee code ko dekhne pr
             // thodaa idea lagg jayegaa
-            const {email, password, fullname, username} = user;
+            const {email, password, fullname, username, roles} = user;
             // agar kuch missing hai toh error denaa hai
             // console.log('Email:', email);
             // console.log('Password:', password);
             // console.log('Fullname:', fullname);
             // console.log('Username:', username);
 
-            if(!email || !password || !fullname || !username) {
+            if(!email || !password || !fullname || !username || !roles) {
                 throw new ErrorHandler(401, " all fields required");
             }
 
@@ -111,6 +111,7 @@ class AuthService {
                         fullname : newUser.fullname,
                         username : newUser.username,
                         email : newUser.email,
+                        roles: newUser.role,
                     } 
                 }
 
