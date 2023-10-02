@@ -31,7 +31,7 @@ class UserService {
 
     getAllUsers = async () => {
         try {
-            await getAllUsersDb();
+           return  await getAllUsersDb();
         } catch (error) {
             throw new ErrorHandler(error.statusCode, error.message);
         }

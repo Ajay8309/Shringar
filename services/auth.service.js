@@ -10,7 +10,7 @@ const {
 const validateUser = require("../helpers/validateUser");
 const {ErrorHandler}= require("../helpers/error");
 const {
-    changeUserPassword,
+    changeUserPasswordDb,
     getUserByEmailDb,
     getUserByUsernameDb,
     createUserDb,
@@ -265,7 +265,7 @@ class AuthService {
             const salt = await bcrypt.genSalt();
             const hashedPassword = await bcrypt.hash(password, salt);
 
-            await changeUserPassword(hashedPassword, email);
+            await changeUserPasswordDb(hashedPassword, email);
             await mail.resetPasswordMail(email);
         } catch (error) {
             throw new ErrorHandler(error.statusCode, error.message);

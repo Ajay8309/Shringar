@@ -7,11 +7,11 @@
     "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
     "start": "cross-env NODE_ENV=production node index",
     "dev": "cross-env NODE_ENV=development nodemon"
-}
-,
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1467.0",
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
@@ -21,6 +21,7 @@
     "dotenv": "^16.3.1",
     "epress": "^0.0.1-security",
     "express-async-errors": "^3.1.1",
+    "fs": "^0.0.1-security",
     "google-auth-library": "^9.0.0",
     "googleapis": "^126.0.1",
     "helmet": "^7.0.0",
