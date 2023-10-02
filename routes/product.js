@@ -23,6 +23,6 @@ router
      .get(getProduct)
      .get(getProductByName)
      .put(verifyToken, verifyAdmin, updateProduct)
-     .delete( deleteProduct);      
+     .delete(verifyAdmin, verifyToken, deleteProduct);      
 
 module.exports = router;     
