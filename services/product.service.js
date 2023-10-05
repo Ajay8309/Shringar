@@ -7,7 +7,7 @@ const {
     createProductDb, 
     deleteProductDb, 
     updateProductDb,
-
+    getProductsByCategoryDb
 } = require("../db/product.db");
 const { ErrorHandler } = require("../helpers/error");
 
@@ -110,6 +110,14 @@ class productService {
       throw error;
     }
   };
+
+  getProductsByCategory = async (categoryName) => {
+    try {
+      return await getProductsByCategoryDb(categoryName);
+    } catch (error) {
+      throw new ErrorHandler(error.statusCode, error.message);
+    }
+  }
 }
 
 module.exports = new productService();

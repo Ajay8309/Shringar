@@ -4,10 +4,14 @@ const {
   addItem, 
   deleteItem, 
   addWishlistItemToCart, 
+  // createWishlist
 } = require("../controllers/wishlist.controller");
-const { verifyResetToken } = require("../services/auth.service");
+const verifyToken = require("../middleware/verifyToken");
 
-router.use(verifyResetToken);
+
+// router.route("/:id").post(createWishlist);
+
+router.use(verifyToken);
 
 router.route("/").get(getWishlist);
 
@@ -16,5 +20,6 @@ router.route("/add").post(addItem);
 router.route("/delete").delete(deleteItem);
 
 router.route("/to-cart").post(addWishlistItemToCart);
+
 
 module.exports = router;

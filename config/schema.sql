@@ -116,8 +116,10 @@ CREATE TABLE public.wishlist_item
         ON DELETE SET NULL,
     FOREIGN KEY (cart_id)  -- Change: Added foreign key to cart
         REFERENCES public.cart (id)
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+    CONSTRAINT unique_wishlist_product UNIQUE (wishlist_id, product_id)  -- Unique constraint
 );
+
 
 -- Create order_item table
 CREATE TABLE public.order_item

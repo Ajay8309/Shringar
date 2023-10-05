@@ -54,6 +54,7 @@ const forgotPassword = async (req, res) => {
 
 const verifyResetToken = async (req, res) => {
     const {token, email} = req.body;
+    // const curDate = new Date();
 
     const isTokenValid = await authService.verifyResetToken(token, email);
 

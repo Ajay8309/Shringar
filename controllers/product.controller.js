@@ -19,7 +19,8 @@ const getProduct = async (req, res) => {
 };
 
 const getProductByName = async (req, res) => {
-    const product = await productService.getProductByName(req.body);
+    const name = req.params.name;
+    const product = await productService.getProductByName(name);
     res.status(200).json(product);
 };
 
@@ -43,11 +44,18 @@ const deleteProduct = async (req, res) => {
     res.status(200).json(deletedProduct);
 };
 
+const getProductsByCategory = async (req, res) => {
+    const categoryName = req.params.categoryName;
+    const Products = await productService.getProductsByCategory(categoryName);
+    res.status(200).json(Products);
+}
+
 module.exports = {
     getAllProducts, 
     createProduct, 
     getProduct, 
     deleteProduct, 
     updateProduct, 
-    getProductByName
+    getProductByName,
+    getProductsByCategory,
 };

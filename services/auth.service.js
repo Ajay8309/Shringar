@@ -34,14 +34,10 @@ class AuthService {
         try {
             // destructure kiya hai user kee data ko ....controller kee code ko dekhne pr
             // thodaa idea lagg jayegaa
-            const {email, password, fullname, username, roles} = user;
+            const {email, password, fullname, username} = user;
             // agar kuch missing hai toh error denaa hai
-            // console.log('Email:', email);
-            // console.log('Password:', password);
-            // console.log('Fullname:', fullname);
-            // console.log('Username:', username);
-
-            if(!email || !password || !fullname || !username || !roles) {
+          
+            if(!email || !password || !fullname || !username ) {
                 throw new ErrorHandler(401, " all fields required");
             }
 
@@ -111,7 +107,6 @@ class AuthService {
                         fullname : newUser.fullname,
                         username : newUser.username,
                         email : newUser.email,
-                        roles: newUser.role,
                     } 
                 }
 
@@ -148,6 +143,7 @@ class AuthService {
             user_id,
             roles,
             cart_id,
+            wishlist_id,
             fullname,
             username,
           } = user;
@@ -157,11 +153,12 @@ class AuthService {
             throw new ErrorHandler(403, "Email or password incorrect.");
           }
     
-          const token = await this.signToken({ id: user_id, roles, cart_id });
+          const token = await this.signToken({ id: user_id, roles, cart_id, wishlist_id });
           const refreshToken = await this.signRefreshToken({
             id: user_id,
             roles,
             cart_id,
+            wishlist_id,
           });
     
           console.log("Login successful. Sending token.");
@@ -231,11 +228,12 @@ class AuthService {
                 token, email, curDate,
             });
             return isValidToken;
-
+    
         } catch (error) {
             throw new ErrorHandler(error.statusCode, error.message);
         }
     }
+    
     
     async resetPassword (password, password2, token, email) {
         const isValidPassword =  typeof password === "string" && password.trim().length >= 6;
@@ -281,7 +279,7 @@ class AuthService {
 
     async signToken(data) {
         try {
-            return jwt.sign(data, process.env.SECRET, {expiresIn:"60s"});
+            return jwt.sign(data, process.env.SECRET, {expiresIn:"1h"});
         } catch (error) {
             logger.error(error);
             throw new ErrorHandler(501, "An error occurred");

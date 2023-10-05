@@ -32,7 +32,7 @@ const setTokenStatusDb = async ({email}) => {
 };
 
 
-const deleteResetTokenDb = async ({curDate}) => {
+const deleteResetTokenDb = async (curDate) => {
     await pool.query(
         `
         delete from public."resetTokens" where expiration <= $1

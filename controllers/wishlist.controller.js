@@ -1,10 +1,21 @@
 
 const wishlistService = require("../services/wishlist.service");
+const cartService = require("../services/cart.service");
+
+const createWishlist = async (req, res) => {
+    const user_id = req.user.user_id;
+    const wishlist = await wishlistService.createWishlist(user_id);
+    res.status(200).json(wishlist);
+};
 
 const getWishlist = async (req, res) => {
-    const user_id = req.user.user_id;
-    const wishlist = await wishlistService.getWishlist(user_id);
-    res.status(200).json({ items: wishlist });
+    const { wishlist_id } = req.body;
+    try {
+        const wishlist = await wishlistService.getWishlist(wishlist_id);
+        res.status(200).json(wishlist);
+    } catch (error) {
+        res.status(error.statusCode || 500).json({ message: error.message });
+    }
 };
 
 const addItem = async (req, res) => {
@@ -20,9 +31,10 @@ const deleteItem = async (req, res) => {
 };
 
 const addWishlistItemToCart = async (req, res) => {
-    const { product_id, user_id } = req.body;
-    const wishlist = await wishlistService.addWishlistItemToCart({ product_id, user_id });
-    res.status(200).json(wishlist);
+    const cart_id = req.user.cart_id;
+
+    const cart = await cartService.addItem({...req.body, cart_id});
+    res.status(200).json({data : cart});
 };
 
 module.exports = {
@@ -30,4 +42,5 @@ module.exports = {
     addItem,
     deleteItem,
     addWishlistItemToCart,
+    createWishlist,
 };

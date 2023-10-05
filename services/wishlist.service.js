@@ -18,9 +18,9 @@ class wishlistService {
        }
     };
 
-    getWishlist = async (userid) => {
+    getWishlist = async (wishlist_id) => {
         try {
-            return await getWishlistDb(userid);
+            return await getWishlistDb(wishlist_id);
         } catch (error) {
             throw new ErrorHandler(error.statusCode, error.message);
         }
@@ -49,6 +49,8 @@ class wishlistService {
             throw new ErrorHandler(error.statusCode, error.message);
         }
     };
+
+    
 }
 
 module.exports = new wishlistService();

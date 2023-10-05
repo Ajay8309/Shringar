@@ -115,7 +115,7 @@ const getProductByNameDb = async (name) => {
         GROUP BY
             products.product_id, material_type.name, product_category.name
         `,
-        [id]
+        [name]
     );
     return product[0];
 }
@@ -143,7 +143,29 @@ const deleteProductDb = async (id) => {
         [id]
     );
     return rows[0];
-}
+};
+
+const getProductsByCategoryDb = async (categoryName) => {
+    const { rows } = await pool.query(
+        `
+        SELECT
+            products.*,
+            material_type.name AS material_type_name,
+            product_category.name AS category_name
+        FROM
+            products
+        JOIN
+            product_category ON products.category_id = product_category.id
+        LEFT JOIN
+            material_type ON products.material_id = material_type.id
+        WHERE
+            product_category.name = $1
+        `,
+        [categoryName]
+    );
+    return rows;
+};
+
 
 
 module.exports = {
@@ -153,6 +175,7 @@ module.exports = {
     getProductByNameDb,
     updateProductDb,
     deleteProductDb,
+    getProductsByCategoryDb
 };
 
 
