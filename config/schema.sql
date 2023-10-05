@@ -145,7 +145,7 @@ CREATE TABLE public.reviews
     rating integer NOT NULL,
     product_id integer NOT NULL,
     date date NOT NULL,
-    id integer NOT NULL,
+    id SERIAL integer NOT NULL,
     PRIMARY KEY (user_id, product_id),
     FOREIGN KEY (product_id)
         REFERENCES public.products (product_id)

@@ -25,12 +25,12 @@ const getProductByName = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    const {name, price, description} = req.body;
+    const {name, weight, description} = req.body;
     const {id} = req.params;
 
     const updatedProduct = await productService.updateProduct({
         name, 
-        price, 
+        weight, 
         description, 
         id, 
     });

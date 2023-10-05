@@ -11,9 +11,15 @@ const {
 
 } = require("../controllers/product.controller");
 
+const {
+     getProductReviews, 
+     createproductReviews, 
+     updateProductReview
+} = require("../controllers/review.controller");
+
 const verifyAdmin = require("../middleware/verifyAdmin");
 const verifyToken = require("../middleware/verifyToken");
-const { route } = require("./user");
+const { route, post } = require("./user");
 
 router
      .route("/")
@@ -36,6 +42,12 @@ router
      .get(getProduct)
      .put(verifyToken, verifyAdmin, updateProduct)
      .delete(verifyAdmin, verifyToken, deleteProduct);    
+
+router
+     .route("/reviews")
+     .get(verifyToken,getProductReviews)
+     .post(verifyToken, createproductReviews)
+     .put(verifyToken, updateProductReview);      
 
 
 module.exports = router;     
