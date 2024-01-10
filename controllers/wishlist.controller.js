@@ -9,20 +9,35 @@ const createWishlist = async (req, res) => {
 };
 
 const getWishlist = async (req, res) => {
-    const { wishlist_id } = req.body;
+    const  wishlist_id  = req.user.wishlist_id;
+    // const {wishlist_id} = req.body;
+    // console.log("Inside get wishlist");
     try {
-        const wishlist = await wishlistService.getWishlist(wishlist_id);
-        res.status(200).json(wishlist);
+        const wishlist = await wishlistService.getWishlist(wishlist_id); 
+        res.status(200).json({items:wishlist});
+       
     } catch (error) {
         res.status(error.statusCode || 500).json({ message: error.message });
     }
 };
 
+// const getCart = async (req, res) => {
+//     const userId = req.user.userId;
+
+//     const cart = await cartService.getCart(userId);
+//     res.json({items: cart});
+// };
+
 const addItem = async (req, res) => {
-    const { wishlist_id, product_id } = req.body; // Assuming these values are in the request body
-    const wishlist = await wishlistService.addItemToWishlist({ wishlist_id, product_id });
+    const wishlist_id = req.user.wishlist_id;
+    const cart_id = req.user.cart_id;
+    const { product_id } = req.body; 
+    // console.log(req.user);
+    const wishlist = await wishlistService.addItemToWishlist({ product_id, wishlist_id, cart_id });
     res.status(200).json({ data: wishlist });
+    // console.log(wishlist);
 };
+
 
 const deleteItem = async (req, res) => {
     const { wishlist_id, product_id } = req.body; // Assuming these values are in the request body

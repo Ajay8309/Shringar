@@ -22,13 +22,17 @@ const createUserDb = async ({ username, password, email, fullname }) => {
 
 
 const getUserByIdDb = async (id) => {
-    const {rows:user} = await pool.query(
-        `select users.*, cart.id as cart_id from users 
-        left join cart on cart.user_id = users.user_id where users.user_id = $1`,
+    const { rows: user } = await pool.query(
+        `SELECT users.*, cart.id AS cart_id, wishlist.id AS wishlist_id 
+         FROM users 
+         LEFT JOIN cart ON cart.user_id = users.user_id 
+         LEFT JOIN wishlist ON wishlist.user_id = users.user_id
+         WHERE users.user_id = $1`,
         [id]
     );
     return user[0];
 }
+
 
 const getUserByUsernameDb = async (username) => {
     const {rows:user} = await pool.query(
@@ -43,15 +47,26 @@ const getUserByUsernameDb = async (username) => {
 
 
 const getUserByEmailDb = async (email) => {
-    const {rows:user} = await pool.query(
+    const { rows: user } = await pool.query(
         `
-        select users.*, cart.id as cart_id from users
-        left join cart on cart.user_id = users.user_id where lower(email) = lower($1)
+        SELECT 
+    users.*, 
+    cart.id AS cart_id, 
+    wishlist.id AS wishlist_id 
+FROM 
+    users
+LEFT JOIN 
+    cart ON cart.user_id = users.user_id
+LEFT JOIN 
+    wishlist ON wishlist.user_id = users.user_id
+WHERE 
+    lower(users.email) = lower($1);
         `,
         [email]
     );
     return user[0];
-}
+};
+
 
 const updateUserDb = async (
     {

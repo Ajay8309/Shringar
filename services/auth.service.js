@@ -107,6 +107,7 @@ class AuthService {
                         fullname : newUser.fullname,
                         username : newUser.username,
                         email : newUser.email,
+                        wishlist_id: newUser.wishlist_id,
                     } 
                 }
 
@@ -129,24 +130,25 @@ class AuthService {
           }
     
           const user = await getUserByEmailDb(email);
-    
+          
           if (!user) {
-            throw new ErrorHandler(403, "Email or password incorrect.");
-          }
-    
-          if (user.google_id && !user.password) {
-            throw new ErrorHandler(403, "Login in with Google");
-          }
-    
-          const {
-            password: dbPassword,
-            user_id,
-            roles,
-            cart_id,
-            wishlist_id,
-            fullname,
-            username,
-          } = user;
+              throw new ErrorHandler(403, "Email or password incorrect.");
+            }
+            
+            if (user.google_id && !user.password) {
+                throw new ErrorHandler(403, "Login in with Google");
+            }
+            
+            const {
+                password: dbPassword,
+                user_id,
+                roles,
+                cart_id,
+                wishlist_id,
+                fullname,
+                username,
+            } = user;
+            // console.log(user);
           const isCorrectPassword = await bcrypt.compare(password, dbPassword);
     
           if (!isCorrectPassword) {
