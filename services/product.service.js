@@ -69,14 +69,27 @@ class productService {
   updateProduct = async (data) => {
     try {
       const product = await getProductDb(data.id);
+  
       if (!product) {
         throw new ErrorHandler(404, "Product not found");
       }
-      return updateProductDb(data);
+  
+      console.log("Existing Product:", product);
+      console.log("Updated Data:", data);
+  
+      await updateProductDb(data);  
+  
+      const updatedProduct = await getProductDb(data.id);
+  
+      console.log("Updated Product:", updatedProduct);
+  
+      return updatedProduct;
     } catch (error) {
+      console.error("Error during product update:", error);
       throw new ErrorHandler(error.statusCode, error.message);
     }
   };
+  
 
   // get Product By category 
   

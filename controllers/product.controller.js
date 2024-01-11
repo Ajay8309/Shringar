@@ -41,13 +41,14 @@ const getProductsByMaterialType = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    const {name, weight, description} = req.body;
+    const {name, weight, description, image_url} = req.body;
     const {id} = req.params;
 
-    const updatedProduct = await productService.updateProduct({
+    const updatedProduct = await productService.updateProduct({ 
         name, 
         weight, 
         description, 
+        image_url,
         id, 
     });
     res.status(200).json(updatedProduct);

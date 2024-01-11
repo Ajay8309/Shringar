@@ -47,7 +47,8 @@ router
      .route("/:id")
      .get(getProductById)
      .put(verifyToken, verifyAdmin, updateProduct)
-     .delete(verifyAdmin, verifyToken, deleteProduct);    
+     .delete(verifyToken, verifyAdmin, deleteProduct);
+   
 
 router
      .route("/:id/reviews")

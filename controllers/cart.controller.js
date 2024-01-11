@@ -11,7 +11,7 @@ const getCart = async (req, res) => {
 
 const addItem = async (req, res) => {
     const cart_id = req.user.cart_id;
-    console.log(req.user);
+    // console.log(req.user);
 
     const cart = await cartService.addItem({...req.body, cart_id});
     res.status(200).json({data : cart});

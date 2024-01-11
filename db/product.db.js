@@ -169,28 +169,59 @@ const getProductsByMaterialTypeDb = async (materialType) => {
 };
 
 
-const updateProductDb = async ({ product_id, name, weight, description, image_url, price, category_name, material_type_name }) => {
-    const { rows: product } = await pool.query(
+const updateProductDb = async ({ id, name, weight, description, image_url, price, category_name, material_type_name }) => {
+    const { rows: updatedProducts } = await pool.query(
         `
         UPDATE products
-        SET name = $1, price = $2, description = $3, image_url = $4, weight = $5,
-            category_id = (SELECT id FROM product_category WHERE name = $6),
-            material_id = (SELECT id FROM material_type WHERE name = $7)
-        WHERE product_id = $8
+        SET
+            name = COALESCE($2, name),
+            price = COALESCE($3, price),
+            description = COALESCE($4, description),
+            image_url = COALESCE($5, image_url),
+            weight = COALESCE($6, weight),
+            category_id = (SELECT id FROM product_category WHERE name = $7),
+            material_id = (SELECT id FROM material_type WHERE name = $8)
+        WHERE product_id = $1
         RETURNING *
+
+        
         `,
-        [name, price, description, image_url, weight, category_name, material_type_name, product_id]
+        [id, name, price, description, image_url, weight, category_name, material_type_name]
     );
-    return product[0];
+
+    return updatedProducts[0];
 };
 
 
+
+
 const deleteProductDb = async (id) => {
-    const {rows} = await pool.query(
-        `DELETE FROM products where product_id = $1 returning *`,
-        [id]
-    );
-    return rows[0];
+
+     // Delete related records from cart_item table
+        await pool.query(
+            `DELETE FROM cart_item WHERE product_id = $1`,
+            [id]
+        );
+
+        // Delete related records from reviews table
+        await pool.query(
+            `DELETE FROM reviews WHERE product_id = $1`,
+            [id]
+        );
+
+        // Delete related records from wishlist_item table
+        await pool.query(
+            `DELETE FROM wishlist_item WHERE product_id = $1`,
+            [id]
+        );
+
+        // Now delete the product
+        const { rows } = await pool.query(
+            `DELETE FROM products WHERE product_id = $1 RETURNING *`,
+            [id]
+        );
+
+        return rows[0];
 };
 
 

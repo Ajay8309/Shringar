@@ -34,6 +34,9 @@ class AuthService {
         try {
             // destructure kiya hai user kee data ko ....controller kee code ko dekhne pr
             // thodaa idea lagg jayegaa
+            if (!req.user || !req.user.roles) {
+                throw new ErrorHandler(401, "User roles not found in request.");
+            }
             const {email, password, fullname, username} = user;
             // agar kuch missing hai toh error denaa hai
           

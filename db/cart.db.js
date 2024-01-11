@@ -61,6 +61,10 @@ const addItemDb = async ({cart_id, product_id, quantity}) => {
     return results.rows;
 };
 
+
+
+
+
 // deleteing item from cart
 
 const deleteItemDb = async ({cart_id, product_id}) => {
