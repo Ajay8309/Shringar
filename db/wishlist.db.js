@@ -103,6 +103,22 @@ const addWishlistItemToCartDb = async ({cart_id, product_id, quantity}) => {
     return results.rows;
 };
 
+const isInWishlistDb = async ({wishlist_id, product_id}) => {
+    console.log(wishlist_id, product_id);
+    const { rows } = await pool.query(
+        `
+        SELECT EXISTS (
+            SELECT 1
+            FROM public.wishlist_item
+            WHERE wishlist_id = $1
+              AND product_id = $2
+        ) AS is_in_wishlist
+        `,
+        [wishlist_id, product_id]
+    );
+
+    return rows[0].is_in_wishlist;
+};
 
 
 module.exports = {
@@ -111,4 +127,5 @@ module.exports = {
     addItemToWishlistDb,
     deleteItemFromWishlistDb,
     addWishlistItemToCartDb,
+    isInWishlistDb
 };

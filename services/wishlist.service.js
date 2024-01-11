@@ -4,6 +4,7 @@ const {
     addItemToWishlistDb, 
     deleteItemFromWishlistDb, 
     addWishlistItemToCartDb,
+    isInWishlistDb
 } = require("../db/wishlist.db");
 
 const {ErrorHandler} = require("../helpers/error");
@@ -49,6 +50,14 @@ class wishlistService {
             throw new ErrorHandler(error.statusCode, error.message);
         }
     };
+
+    isInWishlist = async (data) => {
+        try {
+            return await isInWishlistDb(data);
+        } catch (error) {
+            throw new ErrorHandler(error.statusCode, error.message);
+        }
+    }
 
     
 }

@@ -12,6 +12,7 @@ const getWishlist = async (req, res) => {
     const  wishlist_id  = req.user.wishlist_id;
     // const {wishlist_id} = req.body;
     // console.log("Inside get wishlist");
+    // console.log(req.user);
     try {
         const wishlist = await wishlistService.getWishlist(wishlist_id); 
         res.status(200).json({items:wishlist});
@@ -40,7 +41,9 @@ const addItem = async (req, res) => {
 
 
 const deleteItem = async (req, res) => {
-    const { wishlist_id, product_id } = req.body; // Assuming these values are in the request body
+    const {product_id } = req.body; 
+    const wishlist_id = req.user.wishlist_id;
+    console.log(wishlist_id);
     const wishlist = await wishlistService.deleteItemFromWishlist({ wishlist_id, product_id });
     res.status(200).json(wishlist);
 };
@@ -52,10 +55,21 @@ const addWishlistItemToCart = async (req, res) => {
     res.status(200).json({data : cart});
 };
 
+const isInWishlist = async (req, res) => {
+    const {product_id } = req.body; 
+    const wishlist_id = req.user.wishlist_id;
+//    console.log(wishlist_id + product_id);
+    const wishlist = await wishlistService.isInWishlist({wishlist_id, product_id});
+    // console.log(wishlist);
+    res.status(200).json({wishlist});
+    
+}
+
 module.exports = {
     getWishlist,
     addItem,
     deleteItem,
     addWishlistItemToCart,
     createWishlist,
+    isInWishlist
 };
