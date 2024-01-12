@@ -28,9 +28,9 @@ const getAllProductsDb = async ({limit, offset}) => {
      return products;
 };
 
-const createProductDb = async ({ name, weight, description, image_url, category_name, material_type_name }) => {
+const calculatePrice = async ({ weight, material_type_name }) => {
     let price;
-    
+
     if (material_type_name === "gold") {
         const { rows: goldMaterial } = await pool.query(
             `SELECT gold_price FROM material_type WHERE name = 'gold'`
@@ -50,7 +50,13 @@ const createProductDb = async ({ name, weight, description, image_url, category_
     } else {
         throw new Error("Invalid material type specified.");
     }
-    
+
+    return price;
+};
+
+const createProductDb = async ({ name, weight, description, image_url, category_name, material_type_name }) => {
+    const price = await calculatePrice({ weight, material_type_name });
+
     const { rows: product } = await pool.query(
         `
         INSERT INTO products(name, price, description, image_url, weight, category_id, material_id)
@@ -60,6 +66,29 @@ const createProductDb = async ({ name, weight, description, image_url, category_
         [name, price, description, image_url, weight, category_name, material_type_name]
     );
     return product[0];
+};
+
+const updateProductDb = async ({ id, name, weight, description, image_url, category_name, material_type_name }) => {
+    const price = await calculatePrice({ weight, material_type_name });
+
+    const { rows: updatedProducts } = await pool.query(
+        `
+        UPDATE products
+        SET
+            name = COALESCE($2, name),
+            price = COALESCE($3::real, $9::real), 
+            description = COALESCE($4, description),
+            image_url = COALESCE($5, image_url),
+            weight = COALESCE($6, weight),
+            category_id = (SELECT id FROM product_category WHERE name = $7),
+            material_id = (SELECT id FROM material_type WHERE name = $8)
+        WHERE product_id = $1
+        RETURNING *
+        `,
+        [id, name, price, description, image_url, weight, category_name, material_type_name, price]
+    );
+
+    return updatedProducts[0];
 };
 
 
@@ -169,28 +198,28 @@ const getProductsByMaterialTypeDb = async (materialType) => {
 };
 
 
-const updateProductDb = async ({ id, name, weight, description, image_url, price, category_name, material_type_name }) => {
-    const { rows: updatedProducts } = await pool.query(
-        `
-        UPDATE products
-        SET
-            name = COALESCE($2, name),
-            price = COALESCE($3, price),
-            description = COALESCE($4, description),
-            image_url = COALESCE($5, image_url),
-            weight = COALESCE($6, weight),
-            category_id = (SELECT id FROM product_category WHERE name = $7),
-            material_id = (SELECT id FROM material_type WHERE name = $8)
-        WHERE product_id = $1
-        RETURNING *
+// const updateProductDb = async ({ id, name, weight, description, image_url, price, category_name, material_type_name }) => {
+//     const { rows: updatedProducts } = await pool.query(
+//         `
+//         UPDATE products
+//         SET
+//             name = COALESCE($2, name),
+//             price = COALESCE($3, price),
+//             description = COALESCE($4, description),
+//             image_url = COALESCE($5, image_url),
+//             weight = COALESCE($6, weight),
+//             category_id = (SELECT id FROM product_category WHERE name = $7),
+//             material_id = (SELECT id FROM material_type WHERE name = $8)
+//         WHERE product_id = $1
+//         RETURNING *
 
         
-        `,
-        [id, name, price, description, image_url, weight, category_name, material_type_name]
-    );
+//         `,
+//         [id, name, price, description, image_url, weight, category_name, material_type_name]
+//     );
 
-    return updatedProducts[0];
-};
+//     return updatedProducts[0];
+// };
 
 
 
