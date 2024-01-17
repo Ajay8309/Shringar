@@ -58,7 +58,8 @@ const addWishlistItemToCart = async (req, res) => {
 const isInWishlist = async (req, res) => {
     const {product_id } = req.body; 
     const wishlist_id = req.user.wishlist_id;
-//    console.log(wishlist_id + product_id);
+//    console.log(product_id);
+    //   console.log(wishlist_id);
     const wishlist = await wishlistService.isInWishlist({wishlist_id, product_id});
     // console.log(wishlist);
     res.status(200).json({wishlist});

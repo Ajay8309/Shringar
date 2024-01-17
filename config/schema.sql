@@ -213,3 +213,6 @@ CREATE TABLE public.comparison_list
 -- Modify the products table to include making_charge
 ALTER TABLE public.products
 ADD COLUMN making_charge real;
+
+
+

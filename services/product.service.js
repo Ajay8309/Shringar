@@ -8,7 +8,8 @@ const {
     deleteProductDb, 
     updateProductDb,
     getProductsByCategoryDb,
-    getProductsByMaterialTypeDb
+    getProductsByMaterialTypeDb,
+    filterProductsDb
 } = require("../db/product.db");
 const { ErrorHandler } = require("../helpers/error");
 
@@ -153,6 +154,19 @@ class productService {
       throw error;
     }
   };
+
+  filterProducts = async (data) => {
+    try {
+      const product = await filterProductsDb(data);
+      console.log(data);
+      if(!product) {
+        throw new ErrorHandler(404, "Product not found");
+      }
+      return product;
+    } catch (error) {
+      throw new ErrorHandler(error.statusCode, error.message);
+    }
+  }
 
 }
 

@@ -40,6 +40,9 @@ const getProductsByMaterialType = async (req, res) => {
     res.status(200).json(product);
 };
 
+
+// Get product By Price Range
+
 const updateProduct = async (req, res) => {
     const {name, weight, description, image_url, material_type_name, category_name} = req.body;
     const {id} = req.params;
@@ -63,6 +66,13 @@ const deleteProduct = async (req, res) => {
     res.status(200).json(deletedProduct);
 };
 
+const filterProducts = async (req, res) => {
+    const { maxPrice, minPrice, materialType, categoryName} = req.query; 
+    console.log(req.query);
+    const products = await productService.filterProducts({ maxPrice, minPrice, materialType, categoryName }); 
+    res.status(200).json(products);
+};
+
 
 
 module.exports = {
@@ -74,4 +84,5 @@ module.exports = {
     getProductByName,
     getProductsByCategory,
     getProductsByMaterialType,
+    filterProducts
 };

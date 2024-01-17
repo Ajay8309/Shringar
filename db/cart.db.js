@@ -8,33 +8,17 @@ const createCartDb = async (userId) => {
     return cart[0];
 };
 
-const getCartDb = async (userId) => {
-    const cart = await pool.query(
+const getCartDb = async (cart_id) => {
+    const results = await pool.query(
         `
-        SELECT
-            products.*,
-            cart_item.quantity,
-            round((products.price * cart_item.quantity)::NUMERIC, 2) AS subtotal,
-            material_type.name AS material_type_name,
-            product_category.name AS category_name
-        FROM
-            users
-        JOIN
-            cart ON users.user_id = cart.user_id
-        JOIN
-            cart_item ON cart.id = cart_item.cart_id
-        JOIN
-            products ON products.product_id = cart_item.product_id
-        LEFT JOIN
-            material_type ON products.material_id = material_type.id
-        LEFT JOIN
-            product_category ON products.category_id = product_category.id
-        WHERE
-            users.user_id = $1
+        select products.*, cart_item.quantity, round((products.price * cart_item.quantity)
+        :: numeric, 2)
+        as subtotal from cart_item join products on cart_item.product_id = products.product_id 
+        where cart_item.cart_id = $1
         `,
-        [userId]
+        [cart_id]
     );
-    return cart.rows;
+    return results.rows;
 };
 
 

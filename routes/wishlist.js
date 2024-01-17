@@ -16,7 +16,7 @@ router.use(verifyToken);
 
 router.route("/").get(getWishlist);
 
-router.route("/add").post(addItem);
+router.route("/add").post(addItem);  
 
 router.route("/delete").delete(deleteItem);
 

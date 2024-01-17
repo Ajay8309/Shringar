@@ -16,7 +16,7 @@ router.route("/").get(getCart);
 
 router.route("/add").post(addItem);
 
-router.route("/delete").post(deleteItem);
+router.route("/delete").delete(deleteItem);
 
 router.route("/increment").put(increaseItemQuantity);
 

@@ -69,28 +69,55 @@ const createProductDb = async ({ name, weight, description, image_url, category_
 };
 
 const updateProductDb = async ({ id, name, weight, description, image_url, category_name, material_type_name }) => {
-    const price = await calculatePrice({ weight, material_type_name });
+    if (material_type_name === undefined && weight === undefined) {
+        const { rows: currentProduct } = await pool.query(
+            'SELECT * FROM products WHERE product_id = $1',
+            [id]
+        );
+        return currentProduct[0];
+    }
+
+    const existingProduct = await pool.query(
+        'SELECT weight, material_id FROM products WHERE product_id = $1',
+        [id]
+    );
+    const finalWeight = weight !== undefined ? weight : existingProduct.rows[0].weight;
+
+    const existingMaterial = await pool.query(
+        'SELECT id FROM material_type WHERE name = $1',
+        [material_type_name]
+    );
+    const finalMaterialId = material_type_name !== undefined ? existingMaterial.rows[0].id : existingProduct.rows[0].material_id;
+
+    const price = await calculatePrice({ weight: finalWeight, material_type_name: material_type_name });
+
+    // Build the SET clause dynamically based on defined values
+    const setClause = [
+        'name = COALESCE($2, name)',
+        'price = COALESCE($3::real, price)',
+        'description = COALESCE($4, description)',
+        'image_url = COALESCE($5, image_url)',
+        'weight = COALESCE($6, weight)',
+        'category_id = (SELECT id FROM product_category WHERE name = $7)',
+    ];
+
+    if (material_type_name !== undefined) {
+        setClause.push('material_id = $8');
+    }
 
     const { rows: updatedProducts } = await pool.query(
         `
         UPDATE products
         SET
-            name = COALESCE($2, name),
-            price = COALESCE($3::real, $9::real), 
-            description = COALESCE($4, description),
-            image_url = COALESCE($5, image_url),
-            weight = COALESCE($6, weight),
-            category_id = (SELECT id FROM product_category WHERE name = $7),
-            material_id = (SELECT id FROM material_type WHERE name = $8)
+            ${setClause.join(', ')}
         WHERE product_id = $1
         RETURNING *
         `,
-        [id, name, price, description, image_url, weight, category_name, material_type_name, price]
+        [id, name, price, description, image_url, weight, category_name, finalMaterialId]
     );
 
     return updatedProducts[0];
 };
-
 
 
 const getProductDb = async (id) => {
@@ -198,28 +225,6 @@ const getProductsByMaterialTypeDb = async (materialType) => {
 };
 
 
-// const updateProductDb = async ({ id, name, weight, description, image_url, price, category_name, material_type_name }) => {
-//     const { rows: updatedProducts } = await pool.query(
-//         `
-//         UPDATE products
-//         SET
-//             name = COALESCE($2, name),
-//             price = COALESCE($3, price),
-//             description = COALESCE($4, description),
-//             image_url = COALESCE($5, image_url),
-//             weight = COALESCE($6, weight),
-//             category_id = (SELECT id FROM product_category WHERE name = $7),
-//             material_id = (SELECT id FROM material_type WHERE name = $8)
-//         WHERE product_id = $1
-//         RETURNING *
-
-        
-//         `,
-//         [id, name, price, description, image_url, weight, category_name, material_type_name]
-//     );
-
-//     return updatedProducts[0];
-// };
 
 
 
@@ -253,9 +258,52 @@ const deleteProductDb = async (id) => {
         return rows[0];
 };
 
+const filterProductsDb = async ({ minPrice, maxPrice, categoryName, materialType }) => {
+    let query = `
+        SELECT
+            products.*,
+            material_type.name AS material_type_name,
+            product_category.name AS category_name
+        FROM
+            products
+        JOIN
+            product_category ON products.category_id = product_category.id
+        LEFT JOIN
+            material_type ON products.material_id = material_type.id
+        WHERE 1=1`;
 
+    const values = [];
 
+    let paramCount = 1; // Start counting parameters from 1
 
+    if (minPrice !== undefined && maxPrice !== undefined) {
+        const minPriceNumber = parseFloat(minPrice);
+        const maxPriceNumber = parseFloat(maxPrice);
+        query += ` AND products.price BETWEEN $${paramCount}::numeric AND $${paramCount + 1}::numeric`;
+        values.push(minPriceNumber, maxPriceNumber);
+        paramCount += 2; // Increment by 2 since we used 2 parameters
+    }
+
+    if (materialType) {
+        query += ` AND material_type.name = $${paramCount}::text`;
+        values.push(materialType);
+        paramCount += 1; // Increment by 1
+    }
+
+    if (categoryName) {
+        query += ` AND product_category.name = $${paramCount}::text`;
+        values.push(categoryName);
+        paramCount += 1; // Increment by 1
+    }
+
+    console.log('Generated SQL query:', query);
+    console.log('Parameters:', values);
+
+    // Execute the query
+    const { rows } = await pool.query(query, values);
+    console.log('Database Response:', rows);
+    return rows;
+};
 
 module.exports = {
     getAllProductsDb,
@@ -265,7 +313,8 @@ module.exports = {
     updateProductDb,
     deleteProductDb,
     getProductsByCategoryDb,
-    getProductsByMaterialTypeDb
+    getProductsByMaterialTypeDb,
+    filterProductsDb
 };
 
 

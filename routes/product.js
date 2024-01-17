@@ -9,6 +9,7 @@ const {
     getProductByName, 
     getProductsByCategory,
     getProductsByMaterialType,
+    filterProducts
 
 } = require("../controllers/product.controller");
 
@@ -27,6 +28,10 @@ router
      .get(getAllProducts)
      .get(getProductsByCategory)
      .post(verifyToken, verifyAdmin, createProduct);
+
+router
+     .route("/filter")
+     .get(filterProducts);          
 
 
 router
@@ -48,6 +53,8 @@ router
      .get(getProductById)
      .put(verifyToken, verifyAdmin, updateProduct)
      .delete(verifyToken, verifyAdmin, deleteProduct);
+
+
    
 
 router

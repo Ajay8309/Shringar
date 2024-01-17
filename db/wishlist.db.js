@@ -104,7 +104,7 @@ const addWishlistItemToCartDb = async ({cart_id, product_id, quantity}) => {
 };
 
 const isInWishlistDb = async ({wishlist_id, product_id}) => {
-    console.log(wishlist_id, product_id);
+    // console.log(wishlist_id, product_id);
     const { rows } = await pool.query(
         `
         SELECT EXISTS (
@@ -116,7 +116,7 @@ const isInWishlistDb = async ({wishlist_id, product_id}) => {
         `,
         [wishlist_id, product_id]
     );
-
+    // console.log(rows[0].is_in_wishlist + " " + wishlist_id + " " + product_id);
     return rows[0].is_in_wishlist;
 };
 
