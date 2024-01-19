@@ -40,7 +40,6 @@ const getUserById = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
     const {id} = req.user;
-
     const user = await userService.getUserById(id);
     return res.status(200).json(user);
 };
@@ -48,11 +47,13 @@ const getUserProfile = async (req, res) => {
 const updateUser = async (req, res) => {
     const {username, email, fullname, address, city, state, country} = req.body;
     if(+req.params.id === req.user.id || req.user.roles.includes("admin")) {
+        const user = await userService.getUserById(req.user.id);
+        console.log(user)
         try {
             const results = await userService.updateUser({
-                username, 
-                email, 
-                fullname, 
+                username: username || user.username, 
+                email: email || user.email, 
+                fullname: fullname || user.fullname, 
                 address, 
                 city, 
                 state, 

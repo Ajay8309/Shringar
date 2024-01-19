@@ -68,27 +68,34 @@ WHERE
 };
 
 
-const updateUserDb = async (
-    {
-       username, 
-       email,
-       fullname,
-       id,
-       address,
-       city,
-       state,
-       country,
-    })=>{
-        const {rows:user} = await pool.query(
-            `
-            UPDATE users set username = $1, email = $2, fullname = $3, address = $4, city = $5, 
-            state = $6, country = $7 where user_id = $8 returning username, email, fullname, user_id,
-            address, city, country, state
-            `,
-            [ username, email ,fullname, id, address,city, state, country]
-        );
-        return user[0];
-    };
+const updateUserDb = async ({
+    username,
+    email,
+    fullname,
+    id,
+    address,
+    city,
+    state,
+    country,
+}) => {
+    const { rows: user } = await pool.query(
+        `
+        UPDATE users 
+        SET username = $1, 
+            email = $2, 
+            fullname = $3, 
+            address = $4, 
+            city = $5, 
+            state = $6, 
+            country = $7 
+        WHERE user_id = $8 
+        RETURNING username, email, fullname, address, city, state, country
+        `,
+        [username, email, fullname, address, city, state, country, id]
+    );
+    return user[0];
+};
+
 
 
     const deleteUserDb = async (id) => {

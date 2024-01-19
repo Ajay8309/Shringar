@@ -167,7 +167,7 @@ const getProductByNameDb = async (name) => {
         LEFT JOIN
             product_category ON products.category_id = product_category.id
         WHERE
-            products.product_id = $1
+            products.name = $1  
         GROUP BY
             products.product_id, material_type.name, product_category.name
         `,
@@ -175,6 +175,7 @@ const getProductByNameDb = async (name) => {
     );
     return product[0];
 }
+
 
 // get Product By category
 
