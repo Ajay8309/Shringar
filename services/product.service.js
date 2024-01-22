@@ -46,6 +46,7 @@ class productService {
   getProductById = async (id) => {
     try {
       const product = await getProductDb(id);
+      console.log("product services product by id" + product)
       if (!product) {
         throw new ErrorHandler(404, "Product not found");
       }

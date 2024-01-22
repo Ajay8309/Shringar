@@ -3,37 +3,41 @@ const pool = require("../config");
 const {ErrorHandler} = require("../helpers/error");
 
 const getProductReviews = async (req, res) => {
-    const {product_id, user_id} = req.query;
+    const { id } = req.params;
+    const user_id = req.user.user_id;
 
     try {
         const reviewExist = await pool.query(
             `
-            SELECT EXISTS (SELECT * FROM reviews where product_id = $1 and user_id = $2)
+            SELECT EXISTS (SELECT * FROM reviews WHERE product_id = $1 AND user_id = $2) AS review_exists
             `,
-            [product_id, user_id]
+            [id, user_id]
         );
 
         const reviews = await pool.query(
             `
             SELECT users.fullname as name, reviews.* FROM reviews
-            join users
-            on users.user_id = reviews.user_id
+            JOIN users ON users.user_id = reviews.user_id
             WHERE product_id = $1
             `,
-            [product_id]
+            [id]
         );
+
         res.status(200).json({
-            reviewExist: reviewExist.rows[0].exists,
+            reviewExist: reviewExist.rows[0].review_exists,
             reviews: reviews.rows,
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json(error);
     }
 };
 
 const createproductReviews = async (req, res) => {
-    const {user_id, product_id, content, rating } = req.body;
+    const { product_id, content, rating } = req.body;
+    const user_id = req.user.id;
     // const user_id = req.params.user_id;
+    console.log(req.user);
     const date = new Date();
     // const id = 1;
 
@@ -55,12 +59,12 @@ const createproductReviews = async (req, res) => {
 
 
 const updateProductReview = async (req, res) => {
-    const {content, rating, id} = req.body;
+    const { content, rating, id } = req.body;
 
     try {
         const result = await pool.query(
             `
-            UPDATE reviews set content = $1, rating = $2 where id  $3 returning *
+            UPDATE reviews SET content = $1, rating = $2 WHERE id = $3 RETURNING *
             `,
             [content, rating, id]
         );

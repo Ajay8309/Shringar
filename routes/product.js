@@ -10,7 +10,6 @@ const {
     getProductsByCategory,
     getProductsByMaterialType,
     filterProducts
-
 } = require("../controllers/product.controller");
 
 const {
@@ -21,47 +20,38 @@ const {
 
 const verifyAdmin = require("../middleware/verifyAdmin");
 const verifyToken = require("../middleware/verifyToken");
-const { route, post } = require("./user");
 
 router
-     .route("/")
-     .get(getAllProducts)
-     .get(getProductsByCategory)
-     .post(verifyToken, verifyAdmin, createProduct);
+    .route("/")
+    .get(getAllProducts)  
+    .post(verifyToken, verifyAdmin, createProduct);
 
 router
-     .route("/filter")
-     .get(filterProducts);          
-
-
-router
-     .route("/:name")
-     .get(getProductByName);
+    .route("/filter")
+    .get(filterProducts);
 
 router
-     .route("/category/:categoryName")
-     .get(getProductsByCategory);
-
-     //get product by category name
- router    
-     .route("/Material/:MaterialName")
-     .get(getProductsByMaterialType);
-     // get product by material type name 
+    .route("/category/:categoryName")
+    .get(getProductsByCategory);
 
 router
-     .route("/:id")
-     .get(getProductById)
-     .put(verifyToken, verifyAdmin, updateProduct)
-     .delete(verifyToken, verifyAdmin, deleteProduct);
-
-
-   
+    .route("/Material/:MaterialName")
+    .get(getProductsByMaterialType);
 
 router
-     .route("/:id/reviews")
-     .get(verifyToken,getProductReviews)
-     .post(verifyToken, createproductReviews)
-     .put(verifyToken, updateProductReview);      
+    .route("/:id/reviews")
+    .get(verifyToken, getProductReviews)
+    .post(verifyToken, createproductReviews)
+    .put(verifyToken, updateProductReview);
 
+router
+    .route("/:id")
+    .get(getProductById)
+    .put(verifyToken, verifyAdmin, updateProduct)
+    .delete(verifyToken, verifyAdmin, deleteProduct);
 
-module.exports = router;     
+router
+    .route("/:name")
+    .get(getProductByName);
+
+module.exports = router;

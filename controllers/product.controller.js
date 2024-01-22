@@ -14,13 +14,16 @@ const createProduct = async (req, res) => {
 };
 
 const getProductById = async (req, res) => {
-    // const id = req.params.id;
-    const product = await productService.getProductById(req.params);
+    // console.log("Ajay is my name what is your name");
+    const id = parseInt(req.params.id, 10);
+    const product = await productService.getProductById(id);
+    // console.log("Ajay is my name what is your name");
     res.status(200).json(product);
 };
 
 const getProductByName = async (req, res) => {
     const name = req.params.name;
+    // console.log("My name is Ajay"+name)
     const product = await productService.getProductByName(name);
     res.status(200).json(product);
 };
