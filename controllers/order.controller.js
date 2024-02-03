@@ -6,6 +6,8 @@ const createOrder = async (req, res) => {
     const user_id = req.user.id;
     const cartId = req.user.cart_id;
 
+    // console.log("UserId is" + user_id);
+
     const newOrder = await orderService.createOrder({
         cartId, 
         amount, 
@@ -20,18 +22,22 @@ const createOrder = async (req, res) => {
 };
 
 const getOrder = async (req, res) => {
-    const {id} = req.params;
-    const user_id = req.user.user_id;
+    console.log("Get all orders");
+    const id = parseInt(req.params.id, 10);
+    const user_id = req.user.id;
+    console.log(user_id);
 
     const order = await orderService.getOrderById({id, user_id});
     res.json(order);
 };
 
 const getAllOrders = async (req, res) => {
+   
+    // console.log(req.user);
     const {page = 1} = req.query;
     const user_id = req.user.id;
-
-    const orders = await orderService.getAllOrders(user_id, page);
+    console.log("Get all orders", user_id);
+    const orders = await orderService.getAllOrders({user_id, page});
     res.json(orders);
 }
 

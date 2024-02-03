@@ -18,3 +18,5 @@ class PaymentService {
 }
 
 module.exports = new PaymentService();
+
+// Paytm integration will go here

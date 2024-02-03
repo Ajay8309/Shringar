@@ -36,12 +36,21 @@ const getProductReviews = async (req, res) => {
 const createproductReviews = async (req, res) => {
     const { product_id, content, rating } = req.body;
     const user_id = req.user.id;
-    // const user_id = req.params.user_id;
-    console.log(req.user);
     const date = new Date();
-    // const id = 1;
 
     try {
+        const existingReview = await pool.query(
+            `
+            SELECT * FROM reviews
+            WHERE user_id = $1 AND product_id = $2
+            `,
+            [user_id, product_id]
+        );
+
+        if (existingReview.rows.length > 0) {
+            return res.status(400).json({ error: 'Review already exists for this user and product' });
+        }
+
         const results = await pool.query(
             `
             INSERT INTO reviews(user_id, product_id, content, rating, date)
@@ -49,12 +58,14 @@ const createproductReviews = async (req, res) => {
             `,
             [user_id, product_id, content, rating, date]
         );
+
         res.json(results.rows);
     } catch (error) {
         res.status(500).json(error.detail);
         throw new ErrorHandler(error.statusCode, error.message);
     }
 };
+
 
 
 

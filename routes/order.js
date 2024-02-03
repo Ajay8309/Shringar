@@ -9,7 +9,7 @@ const verifyToken = require("../middleware/verifyToken");
 
 router.route("/create").post(verifyToken, createOrder);
 
-router.route("/").get( getAllOrders);
+router.route("/").get(verifyToken, getAllOrders);
 
 router.route("/:id").get(verifyToken, getOrder);
 
