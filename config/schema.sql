@@ -14,6 +14,7 @@ CREATE TABLE public.users
     country character varying(100),
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id)
+    
 );
 
 -- Add unique indexes for email and username
@@ -34,23 +35,6 @@ CREATE TABLE public.cart
         ON DELETE SET NULL
 );
 
--- Create a cart_item table
-CREATE TABLE public.cart_item
-(
-    id SERIAL NOT NULL,
-    cart_id integer NOT NULL,
-    product_id integer NOT NULL,
-    quantity integer NOT NULL CHECK (quantity > 0),
-    PRIMARY KEY (id),
-    UNIQUE (cart_id, product_id),
-    FOREIGN KEY (cart_id)
-        REFERENCES public.cart (id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (product_id)
-        REFERENCES public.products (product_id)
-        ON DELETE SET NULL
-);
-
 -- Create a product_category table
 CREATE TABLE public.product_category
 (
@@ -63,8 +47,8 @@ CREATE TABLE public.product_category
 CREATE TABLE public.material_type
 (
     id SERIAL NOT NULL,
-    gold_price real, -- Add gold_price attribute
-    silver_price real, -- Add silver_price attribute
+    gold_price real,
+    silver_price real,
     name character varying(50) NOT NULL,
     PRIMARY KEY (id)
 );
@@ -79,13 +63,31 @@ CREATE TABLE public.products
     image_url character varying,
     category_id integer,
     material_id integer,
-    weight real, 
+    weight real,
+    making_charge real,
     PRIMARY KEY (product_id),
     FOREIGN KEY (category_id)
         REFERENCES public.product_category (id)
         ON DELETE SET NULL,
     FOREIGN KEY (material_id)
         REFERENCES public.material_type (id)
+        ON DELETE SET NULL
+);
+
+-- Create a cart_item table
+CREATE TABLE public.cart_item
+(
+    id SERIAL NOT NULL,
+    cart_id integer NOT NULL,
+    product_id integer NOT NULL,
+    quantity integer NOT NULL CHECK (quantity > 0),
+    PRIMARY KEY (id),
+    UNIQUE (cart_id, product_id),
+    FOREIGN KEY (cart_id)
+        REFERENCES public.cart (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (product_id)
+        REFERENCES public.products (product_id)
         ON DELETE SET NULL
 );
 
@@ -106,7 +108,7 @@ CREATE TABLE public.wishlist_item
     id SERIAL NOT NULL,
     wishlist_id integer NOT NULL,
     product_id integer NOT NULL,
-    cart_id integer,  -- Change: Added cart_id column
+    cart_id integer,
     PRIMARY KEY (id),
     FOREIGN KEY (wishlist_id)
         REFERENCES public.wishlist (id)
@@ -114,14 +116,30 @@ CREATE TABLE public.wishlist_item
     FOREIGN KEY (product_id)
         REFERENCES public.products (product_id)
         ON DELETE SET NULL,
-    FOREIGN KEY (cart_id)  -- Change: Added foreign key to cart
+    FOREIGN KEY (cart_id)
         REFERENCES public.cart (id)
         ON DELETE SET NULL,
-    CONSTRAINT unique_wishlist_product UNIQUE (wishlist_id, product_id)  -- Unique constraint
+    CONSTRAINT unique_wishlist_product UNIQUE (wishlist_id, product_id)
 );
 
+-- Create an orders table
+CREATE TABLE public.orders
+(
+    order_id SERIAL NOT NULL,
+    user_id integer NOT NULL,
+    status character varying(20) NOT NULL,
+    date timestamp without time zone DEFAULT CURRENT_DATE NOT NULL,
+    amount real,
+    total integer,
+    ref character varying(100),
+    payment_method character varying,
+    PRIMARY KEY (order_id),
+    FOREIGN KEY (user_id)
+        REFERENCES public.users (user_id)
+        ON DELETE CASCADE
+);
 
--- Create order_item table
+-- Create the order_item table
 CREATE TABLE public.order_item
 (
     id SERIAL NOT NULL,
@@ -140,13 +158,13 @@ CREATE TABLE public.order_item
 -- Create a reviews table
 CREATE TABLE public.reviews
 (
+    id SERIAL NOT NULL,
     user_id integer NOT NULL,
     content text NOT NULL,
     rating integer NOT NULL,
     product_id integer NOT NULL,
     date date NOT NULL,
-    id SERIAL integer NOT NULL,
-    PRIMARY KEY (user_id, product_id),
+    PRIMARY KEY (id),
     FOREIGN KEY (product_id)
         REFERENCES public.products (product_id)
         ON DELETE SET NULL,
@@ -155,37 +173,8 @@ CREATE TABLE public.reviews
         ON DELETE SET NULL
 );
 
--- Create an orders table
-CREATE TYPE "payment" AS ENUM (
-  'PAYSTACK',
-  'STRIPE'
-);
-
-CREATE TABLE public.orders
-(
-    order_id SERIAL NOT NULL,
-    user_id integer NOT NULL,
-    status character varying(20) NOT NULL,
-    date timestamp without time zone DEFAULT CURRENT_DATE NOT NULL,
-    amount real,
-    total integer,
-    ref character varying(100),
-    payment_method payment,
-    PRIMARY KEY (order_id),
-    FOREIGN KEY (user_id)
-        REFERENCES public.users (user_id)
-        ON DELETE CASCADE
-);
-
--- Add indexes for the new columns
-CREATE INDEX products_category_id_idx
-    ON public.products (category_id);
-
-CREATE INDEX products_material_id_idx
-    ON public.products (material_id);
-
-
- CREATE TABLE public."resetTokens"
+-- Create the resetTokens table
+CREATE TABLE public."resetTokens"
 (
     id SERIAL NOT NULL,
     email character varying NOT NULL,
@@ -195,7 +184,7 @@ CREATE INDEX products_material_id_idx
     PRIMARY KEY (id)
 );
 
-
+-- Create the comparison_list table
 CREATE TABLE public.comparison_list
 (
     user_id integer NOT NULL,
@@ -208,11 +197,3 @@ CREATE TABLE public.comparison_list
         REFERENCES public.products (product_id)
         ON DELETE CASCADE
 );
-
--- 1. solved 
--- Modify the products table to include making_charge
-ALTER TABLE public.products
-ADD COLUMN making_charge real;
-
-
-

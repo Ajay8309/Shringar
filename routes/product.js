@@ -45,13 +45,14 @@ router
     .put(verifyToken, updateProductReview);
 
 router
+    .route("/name/:name")
+    .get(getProductByName);
+
+router
     .route("/:id")
     .get(getProductById)
     .put(verifyToken, verifyAdmin, updateProduct)
     .delete(verifyToken, verifyAdmin, deleteProduct);
 
-router
-    .route("/:name")
-    .get(getProductByName);
 
 module.exports = router;

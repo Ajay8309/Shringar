@@ -36,8 +36,8 @@ const getAllOrders = async (req, res) => {
     // console.log(req.user);
     const {page = 1} = req.query;
     const user_id = req.user.id;
-    console.log("Get all orders", user_id);
-    const orders = await orderService.getAllOrders({user_id, page});
+    // console.log("Get all orders", user_id);
+    const orders = await orderService.getAllOrders(user_id, page);
     res.json(orders);
 }
 

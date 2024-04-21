@@ -62,6 +62,7 @@ class productService {
       if (!product) {
         throw new ErrorHandler(404, "Product not found");
       }
+      console.log(product);
       return product;
     } catch (error) {
       throw new ErrorHandler(error.statusCode, error.message);

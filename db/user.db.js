@@ -111,6 +111,14 @@ const updateUserDb = async ({
     // we'll take care of it later
     // const createUserGoogleDb = async ({sub, de})
 
+    const createUserGoogleDb = async ({sub, defaultUsername, email, name}) => {
+        const {rows} = await pool.query(`INSERT INTO users(google_id, username, email, fullname)
+        VALUES($1, $2, $3, $4) ON CONFLICT (email)
+        DO UPDATE SET google_id = $1, fullname = $4 returning *`, 
+         [sub, defaultUsername, email, name]
+        );
+    }
+
     const changeUserPasswordDb = async (hashedPasssword, email) => {
         return await pool.query(
             `update users set password = $1 where email = $2`,
@@ -124,7 +132,7 @@ const updateUserDb = async ({
             getUserByEmailDb,
             updateUserDb,
             createUserDb,
-            // createUserGoogleDb,
+            createUserGoogleDb,
             deleteUserDb,
             getUserByUsernameDb,
             changeUserPasswordDb,

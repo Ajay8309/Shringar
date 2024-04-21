@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  server:
+    image: shiringar
+    container_name: shiringar
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST=shringar 
+      - POSTGRES_PASSWORD=9738
+      - POSTGRES_DB=new
+      - POSTGRES_DB_TEST=new
+      - POSTGRES_PORT=5432
+    volumes:
+      - /usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 9010:9000
+    depends_on:
+      - database
+
+  database:
+    container_name: shringar-db
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_PASSWORD=9738
+    ports:
+      - 5434:5432
+    volumes:
+      - ./config/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - /db:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "ajaypanaskar8@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "9738"
+    ports:
+      - "16543:80"
+    depends_on:
+      - database
+volumes:
+  db:
+    driver: local    
+      

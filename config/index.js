@@ -7,6 +7,9 @@ const database = process.env.NODE_ENV === "test" ?
 
 const connectionString = `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${database}`;
 
+console.log("isProduction:", isProduction);
+console.log("connectionString:", connectionString);
+
 const pool = new Pool({
     connectionString,
     ssl: isProduction ? { rejectUnauthorized: false } : false,

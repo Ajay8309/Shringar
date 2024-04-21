@@ -40,9 +40,17 @@ const loginUser = async (req, res) => {
 }
 
 
-// const googleLogin = async (req, res) => {
 
-// }
+const googleLogin = async (req, res) => {
+    const {code} = req.body;
+
+    const user = await authService.googleLogin(code);
+    res.header("auth-token", user.token);
+    res.cookie("refreshToken", user.refreshToken, {
+        httpOnly: true, 
+    });
+    res.json(user);
+}
 
 
 const forgotPassword = async (req, res) => {
@@ -103,5 +111,5 @@ module.exports = {
     verifyResetToken,
     resetPassword,
     refreshToken,
-    // googleLogin 
+    googleLogin 
 }

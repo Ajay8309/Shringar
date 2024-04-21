@@ -22,8 +22,9 @@ const getProductById = async (req, res) => {
 };
 
 const getProductByName = async (req, res) => {
+    console.log("insode server my name is Akay")
     const name = req.params.name;
-    // console.log("My name is Ajay"+name)
+    console.log(name);
     const product = await productService.getProductByName(name);
     res.status(200).json(product);
 };

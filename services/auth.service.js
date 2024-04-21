@@ -14,7 +14,7 @@ const {
     getUserByEmailDb,
     getUserByUsernameDb,
     createUserDb,
-    // createUserGoogleDb
+    createUserGoogleDb
 } = require("../db/user.db");
 
 const {createCartDb} = require("../db/cart.db");
@@ -34,16 +34,21 @@ class AuthService {
         try {
             // destructure kiya hai user kee data ko ....controller kee code ko dekhne pr
             // thodaa idea lagg jayegaa
-            if (!req.user || !req.user.roles) {
+
+            // console.log("singup func ke andar hu mai")
+
+            // console.log("singup func ke andar hu mai", user.role)
+            
+            if (!user || !user.role) {
                 throw new ErrorHandler(401, "User roles not found in request.");
             }
             const {email, password, fullname, username} = user;
             // agar kuch missing hai toh error denaa hai
-          
+            
             if(!email || !password || !fullname || !username ) {
                 throw new ErrorHandler(401, " all fields required");
             }
-
+            
             if(validateUser(email, password)) {
                 // salt create kiyaa jisee hum humare password kee saath mixup krenge and 
                 // kuch secure hashPassword create krenge 
@@ -184,9 +189,56 @@ class AuthService {
       }
     // thodaa idher udher dekh kr sikhna pdegaa
 
-    // async googleLogin(code) {
+    async googleLogin(code) {
+        try {
+            const ticket = await this.verifyGoogleIdToken(code);
+            const {name, email, sub} = ticket.payload();
+            const defaultUsername = name.replace(/ /g, "").toLowerCase();
 
-    // }
+            try {
+                const user = await getUserByEmailDb(email);
+                if(!user?.google_id) {
+                    const user = await createUserGoogleDb({
+                        sub,
+                        defaultUsername, 
+                        email, 
+                        name,
+                    });
+                    await createCartDb(user.user_id);
+                    await mail.signupMail(user.email, user.fullname.split(" ")[0]);
+                }
+
+                const {user_id, cart_id, roles, fullname, username} = 
+                 await getUserByEmailDb(email);
+                 
+                const token = await this.signToken({
+                    id:user_id, 
+                    roles, 
+                    cart_id
+                }) 
+
+                const refreshToken = await this.signRefreshToken ({
+                    id:user_id, 
+                    roles, 
+                    cart_id, 
+                })
+
+                return {
+                    token, 
+                    refreshToken, 
+                    user:{
+                        user_id, 
+                        fullname, 
+                        username,
+                    },
+                }
+            } catch (error) {
+                throw new ErrorHandler(error.statusCode, error.message);
+            }
+        } catch (error) {
+            throw new ErrorHandler(401, error.message);
+        }
+    }
 
     // genrate refresh token 
     async generateRefreshToken(data) {

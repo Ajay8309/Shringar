@@ -150,6 +150,9 @@ const getProductDb = async (id) => {
 
 
 const getProductByNameDb = async (name) => {
+    // Convert the search input to lowercase
+    const lowerCaseName = name.toLowerCase();
+
     const { rows: product } = await pool.query(
         `
         SELECT
@@ -167,14 +170,15 @@ const getProductByNameDb = async (name) => {
         LEFT JOIN
             product_category ON products.category_id = product_category.id
         WHERE
-            products.name = $1  
+            LOWER(products.name) = $1  -- Use LOWER() to convert stored names to lowercase for comparison
         GROUP BY
             products.product_id, material_type.name, product_category.name
         `,
-        [name]
+        [lowerCaseName]  // Pass the lowercase search input as parameter
     );
     return product[0];
 }
+
 
 
 // get Product By category

@@ -6,14 +6,18 @@ const {
    verifyResetToken,
    resetPassword,
    refreshToken,
-//    googleLogin,
+   googleLogin,
 } = require("../controllers/auth.controller");
+
+const verifyAdmin = require("../middleware/verifyAdmin");
 
 router.post("/signup", createAccount);
 
 router.post("/login", loginUser);
 
-// router.post("/google", googleLogin);
+router.post("/login-admin", loginUser, verifyAdmin);
+
+router.post("/google", googleLogin);
 
 router.post("/forgot-password", forgotPassword);
 
