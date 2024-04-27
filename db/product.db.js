@@ -54,42 +54,59 @@ const calculatePrice = async ({ weight, material_type_name }) => {
     return price;
 };
 
-const createProductDb = async ({ name, weight, description, image_url, category_name, material_type_name }) => {
+const createProductDb = async ({ name, weight, description, image_url, category_name, material_type_name, carat }) => {
     const price = await calculatePrice({ weight, material_type_name });
 
     const { rows: product } = await pool.query(
         `
-        INSERT INTO products(name, price, description, image_url, weight, category_id, material_id)
-        VALUES ($1, $2, $3, $4, $5, (SELECT id FROM product_category WHERE name = $6), (SELECT id FROM material_type WHERE name = $7))
+        INSERT INTO products(name, price, description, image_url, weight, category_id, material_id, carat)
+        VALUES ($1, $2, $3, $4, $5, (SELECT id FROM product_category WHERE name = $6), (SELECT id FROM material_type WHERE name = $7), $8)
         RETURNING *
         `,
-        [name, price, description, image_url, weight, category_name, material_type_name]
+        [name, price, description, image_url, weight, category_name, material_type_name, carat]
     );
     return product[0];
 };
 
+
 const updateProductDb = async ({ id, name, weight, description, image_url, category_name, material_type_name }) => {
-    if (material_type_name === undefined && weight === undefined) {
-        const { rows: currentProduct } = await pool.query(
-            'SELECT * FROM products WHERE product_id = $1',
-            [id]
-        );
-        return currentProduct[0];
+    const existingProduct = await pool.query('SELECT * FROM products WHERE product_id = $1', [id]);
+    if (existingProduct.rows.length === 0) {
+        throw new Error('Product not found');
     }
 
-    const existingProduct = await pool.query(
-        'SELECT weight, material_id FROM products WHERE product_id = $1',
-        [id]
-    );
-    const finalWeight = weight !== undefined ? weight : existingProduct.rows[0].weight;
+    let price = existingProduct.rows[0].price;
 
-    const existingMaterial = await pool.query(
-        'SELECT id FROM material_type WHERE name = $1',
-        [material_type_name]
-    );
-    const finalMaterialId = material_type_name !== undefined ? existingMaterial.rows[0].id : existingProduct.rows[0].material_id;
+    // Calculate price if weight and material type are provided
+    if (weight !== undefined && material_type_name !== undefined) {
+        price = await calculatePrice({ weight, material_type_name });
+    }
 
-    const price = await calculatePrice({ weight: finalWeight, material_type_name: material_type_name });
+    // Validate material type if provided
+    let finalMaterialId = null;
+    if (material_type_name !== undefined) {
+        const existingMaterial = await pool.query('SELECT id FROM material_type WHERE name = $1', [material_type_name]);
+        if (existingMaterial.rows.length === 0) {
+            throw new Error('Invalid material type specified.');
+        }
+        finalMaterialId = existingMaterial.rows[0].id;
+    }
+
+    let finalCategoryId = null;
+    if (category_name !== undefined) {
+        // Check if the category exists
+        const existingCategory = await pool.query('SELECT id FROM product_category WHERE name = $1', [category_name]);
+        if (existingCategory.rows.length === 0) {
+            // If category doesn't exist, create it
+            const newCategory = await pool.query('INSERT INTO product_category (name) VALUES ($1) RETURNING id', [category_name]);
+            if (newCategory.rows.length === 0) {
+                throw new Error('Failed to create category');
+            }
+            finalCategoryId = newCategory.rows[0].id;
+        } else {
+            finalCategoryId = existingCategory.rows[0].id;
+        }
+    }
 
     // Build the SET clause dynamically based on defined values
     const setClause = [
@@ -98,26 +115,28 @@ const updateProductDb = async ({ id, name, weight, description, image_url, categ
         'description = COALESCE($4, description)',
         'image_url = COALESCE($5, image_url)',
         'weight = COALESCE($6, weight)',
-        'category_id = (SELECT id FROM product_category WHERE name = $7)',
+        'category_id = COALESCE($7, category_id)',
+        'material_id = COALESCE($8, material_id)'
     ];
 
-    if (material_type_name !== undefined) {
-        setClause.push('material_id = $8');
-    }
+    const setValues = [id, name, price, description, image_url, weight, finalCategoryId, finalMaterialId];
 
     const { rows: updatedProducts } = await pool.query(
-        `
-        UPDATE products
-        SET
-            ${setClause.join(', ')}
+        `UPDATE products
+        SET ${setClause.join(', ')}
         WHERE product_id = $1
-        RETURNING *
-        `,
-        [id, name, price, description, image_url, weight, category_name, finalMaterialId]
+        RETURNING *`,
+        setValues
     );
 
     return updatedProducts[0];
 };
+
+
+
+
+
+
 
 
 const getProductDb = async (id) => {
