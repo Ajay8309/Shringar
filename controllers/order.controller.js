@@ -1,6 +1,14 @@
 const orderService = require("../services/order.service");
 const cartService = require("../services/cart.service");
 
+
+const getAll = async (req, res) => {
+    const {page = 1} = req.query;
+
+    const orders = await orderService.getAll(page);
+    res.json(orders);
+}
+
 const createOrder = async (req, res) => {
     const {amount, itemTotal, paymentMethod, ref} = req.body;
     const user_id = req.user.id;
@@ -22,10 +30,10 @@ const createOrder = async (req, res) => {
 };
 
 const getOrder = async (req, res) => {
-    console.log("Get all orders");
+    // console.log("Get all orders");
     const id = parseInt(req.params.id, 10);
     const user_id = req.user.id;
-    console.log(user_id);
+    // console.log(user_id);
 
     const order = await orderService.getOrderById({id, user_id});
     res.json(order);
@@ -45,4 +53,5 @@ module.exports = {
     getAllOrders, 
     getOrder, 
     createOrder,
+    getAll
 };

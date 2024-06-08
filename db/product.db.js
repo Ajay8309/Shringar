@@ -1,5 +1,7 @@
 const pool = require("../config/index");
 
+
+
 const getAllProductsDb = async ({limit, offset}) => {
      const {rows} = await pool.query(
         `
@@ -131,13 +133,6 @@ const updateProductDb = async ({ id, name, weight, description, image_url, categ
 
     return updatedProducts[0];
 };
-
-
-
-
-
-
-
 
 const getProductDb = async (id) => {
     const { rows: product } = await pool.query(

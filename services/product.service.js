@@ -71,6 +71,8 @@ class productService {
 
   updateProduct = async (data) => {
     try {
+      console.log(data);
+
       const product = await getProductDb(data.id);
   
       if (!product) {

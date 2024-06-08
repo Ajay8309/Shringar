@@ -29,9 +29,11 @@ class UserService {
         }
     };
 
-    getAllUsers = async () => {
+    getAllUsers = async (page) => {
+        const limit = 12;
+        const offset = (page - 1) * limit;
         try {
-           return  await getAllUsersDb();
+           return  await getAllUsersDb({limit, offset});
         } catch (error) {
             throw new ErrorHandler(error.statusCode, error.message);
         }

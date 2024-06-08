@@ -3,7 +3,8 @@ const {ErrorHandler} = require("../helpers/error");
 const {hashPassword} = require("../helpers/hashPassword");
 
 const getAllUsers = async (req, res) => {
-    const results = await userService.getAllUsers();
+    const {page = 1} = req.query;
+    const results = await userService.getAllUsers(page);
     res.status(200).json(results);
 };
 

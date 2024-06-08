@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {
     setTokenStatusDb,
@@ -39,7 +39,7 @@ class AuthService {
 
             // console.log("singup func ke andar hu mai", user.role)
             
-            if (!user || !user.role) {
+            if (!user || !user.roles) {
                 throw new ErrorHandler(401, "User roles not found in request.");
             }
             const {email, password, fullname, username} = user;
@@ -270,7 +270,7 @@ class AuthService {
            await createResetTokenDb({ email, expireDate, fpSalt });
 
         await mail.forgotPasswordMail(fpSalt, email);
-      } catch (error) {p2
+      } catch (error) {
         throw new ErrorHandler(error.statusCode, error.message);
       }
     } else {

@@ -1,4 +1,8 @@
+
 -- Create users table
+-- CREATE DATABASE new;
+-- \c new;
+
 CREATE TABLE public.users
 (
     user_id SERIAL NOT NULL,
@@ -14,7 +18,6 @@ CREATE TABLE public.users
     country character varying(100),
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id)
-    
 );
 
 -- Add unique indexes for email and username
@@ -197,3 +200,14 @@ CREATE TABLE public.comparison_list
         REFERENCES public.products (product_id)
         ON DELETE CASCADE
 );
+
+ ALTER TABLE public.products
+ADD COLUMN carat integer;
+
+UPDATE public.material_type
+SET gold_price = 7400
+WHERE name = 'gold';
+
+
+ALTER TABLE public.orders
+    ALTER COLUMN payment_method TYPE character varying(50);

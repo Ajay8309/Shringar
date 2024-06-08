@@ -2,11 +2,24 @@ const {
     createOrderDb, 
     getAllOrdersDb, 
     getOrderDb,
+    getAllDb
 } = require("../db/orders.db");
 
 const {ErrorHandler} = require("../helpers/error");
 
 class orderService {
+
+ getAll = async (page) => {
+    const limit = 12;
+    const offset = (page - 1) * limit;
+
+    try {
+      return await getAllDb({ limit, offset });
+    } catch (error) {
+      throw new ErrorHandler(error.statusCode, error.message);
+    }
+    }
+
     createOrder = async (data) => {
         try {
             return await createOrderDb(data);

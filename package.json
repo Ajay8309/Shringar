@@ -13,12 +13,13 @@
   "dependencies": {
     "aws-sdk": "^2.1467.0",
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.4.5",
     "epress": "^0.0.1-security",
     "express-async-errors": "^3.1.1",
     "fs": "^0.0.1-security",
@@ -32,6 +33,7 @@
     "nodemon": "^3.0.1",
     "pg": "^8.11.3",
     "pino": "^8.15.1",
+    "razorpay": "^2.9.3",
     "stripe": "^13.6.0",
     "supertest": "^6.3.3"
   }

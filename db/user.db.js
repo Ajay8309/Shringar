@@ -1,9 +1,10 @@
 const pool = require("../config/index");
 
 
-const getAllUsersDb = async () => {
+const getAllUsersDb = async ({limit, offset}) => {
     const {rows:users} = await pool.query(
-        `select * from users`
+        `select * from users LIMIT $1 OFFSET $2;`, 
+        [limit, offset]
     );
     return users;
 };
@@ -11,14 +12,16 @@ const getAllUsersDb = async () => {
 const createUserDb = async ({ username, password, email, fullname }) => {
     const { rows: user } = await pool.query(
         `
-        INSERT INTO users(username, password, email, fullname)
-        VALUES ($1, $2, $3, $4)
-        RETURNING user_id, username, email, fullname
+        INSERT INTO users(username, password, email, fullname, roles)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING user_id, username, email, fullname, roles
         `,
-        [username, password, email, fullname]
+        [username, password, email, fullname, roles]
     );
     return user[0];
 };
+
+
 
 
 const getUserByIdDb = async (id) => {
